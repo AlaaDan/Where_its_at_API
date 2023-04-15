@@ -1,19 +1,24 @@
 const {Router, response, request} = require('express')
 const router = Router()
 const eventDB = require('../events.json')
-const nedb = require('nedb-promises')
-const userDB = nedb.create('userDB.db')
-const orderDB = nedb.create('orderDB.db')
-const apikeyChecker = require('../middleware/event')
-const validateSchema = require('../middleware/event')
-
-
-router.get('/menu', (request, response)=>{
-    response.json({sccuess: true, eventDB})
+const {apikeyChecker, validateEvent, eventChecker, validateUser} = require('../middleware/event')
+const {ticketDB, orderDB} = require('../Database/db')
+const {createUser, login} = require("../controlers/auth.controler")
+router.get('/events', (request, response)=>{
+    const db = eventDB.events
+    response.json({sccuess: true, Event: db})
 })
 
-router.post('/buy', apikeyChecker, validateSchema, (req, res)=>{
+router.post('/buy', validateEvent, eventChecker, async (req, res)=>{
+    const event =  req.body
+    await orderDB.insert(event)
+    
+    res.json({success: true})
    
 })
+
+router.post('/signup', validateUser , createUser)
+
+router.post('/login', validateUser, login )
 
 module.exports = router

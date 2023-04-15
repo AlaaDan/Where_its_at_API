@@ -1,5 +1,5 @@
 const events = require('../events.json')
-const schemaChecker = require('../schema/order.schema')
+const {schemaChecker, userSchemachecker} = require('../schema/order.schema')
 
 function apikeyChecker(req, res, next){
     const apiKey = req.headers['api-key']
@@ -17,9 +17,9 @@ function apikeyChecker(req, res, next){
 
 function eventChecker(req, res, next){
     const userEvent = req.body
-    if (events.some((eve )=> eve.title === userEvent.name)){
-        const price = events.find((eve)=> eve.title === userEvent.title)?.price
-        if (userEvent === price ){
+    if (events.events.some((eve )=> eve.artist === userEvent.artist)){
+        const price = events.events.find((eve)=> eve.price === userEvent.price)?.price
+        if (userEvent.price === price ){
             next()
         } else {
             res.status(400).json({success: false, message: "Invalid price"})
@@ -29,14 +29,22 @@ function eventChecker(req, res, next){
     }
 }
 
-function validateSchema(req, res, next){
+function validateEvent(req, res, next){
     const validation = schemaChecker(req.body)
 
-    if(validation?.error){
-        res.status(400).json({success: false, erro: validation.erro.message})
-    }else{
-        next()
-    }
+    if(validation.error) return res.status(400).json({success: false, error: validation.error.message})
+    next()
+
+
 }
 
-module.exports = apikeyChecker, eventChecker, validateSchema 
+function validateUser(req,res,next){
+    const userValidate  = userSchemachecker(req.body)
+
+    if(userValidate.error) return res.status(400).json({success: false, error: validation.error.message})
+    next()
+
+
+}
+
+module.exports = {apikeyChecker, eventChecker, validateEvent, validateUser} 
