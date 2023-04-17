@@ -9,11 +9,11 @@ router.get('/events', (request, response)=>{
     response.json({sccuess: true, Event: db})
 })
 
-router.post('/buy', validateEvent, eventChecker, async (req, res)=>{
+router.post('/buy', validateEvent, eventChecker,apikeyChecker, async (req, res)=>{
     const event =  req.body
     await orderDB.insert(event)
     
-    res.json({success: true})
+    res.json({success: true, event})
    
 })
 
